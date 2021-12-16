@@ -6,12 +6,16 @@ ALTER TABLE Tickets DROP FOREIGN KEY PassengerID_FK;
 ALTER TABLE Tickets DROP FOREIGN KEY TripNb_Tickets_FK;
 ALTER TABLE Trips DROP FOREIGN KEY RouteID_FK;
 ALTER TABLE Trips DROP FOREIGN KEY TrainNb_FK;
-ALTER TABLE Fare DROP FOREIGN KEY TripNb_Fare_FK;
+ALTER TABLE Fare DROP FOREIGN KEY RouteID_Fare_FK;
+ALTER TABLE AvailableSeats DROP FOREIGN KEY TripNb_AS_FK;
+/*
 ALTER TABLE Users DROP CHECK chk_Sub;
 ALTER TABLE Tickets DROP CHECK chk_Tickets_Class;
 ALTER TABLE Passengers DROP CHECK chk_Passengers_AgeCat;
 ALTER TABLE Fare DROP CHECK chk_Fare_AgeCat;
 ALTER TABLE Fare DROP CHECK chk_Fare_Class;
+ALTER TABLE AvailableSeats DROP CHECK chk_AS_Class;
+ALTER TABLE Receipts DROP CHECK chk_PaymentMethod;
 ALTER TABLE Routes DROP PRIMARY KEY;
 ALTER TABLE Trains DROP PRIMARY KEY;
 ALTER TABLE Users DROP PRIMARY KEY;
@@ -20,7 +24,8 @@ ALTER TABLE Tickets DROP PRIMARY KEY;
 ALTER TABLE Passengers DROP PRIMARY KEY;
 ALTER TABLE Trips DROP PRIMARY KEY;
 ALTER TABLE Fare DROP PRIMARY KEY;
-
+ALTER TABLE AvailableSeats DROP PRIMARY KEY;
+*/
 DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Receipts;
 DROP TABLE IF EXISTS Tickets;
@@ -29,6 +34,7 @@ DROP TABLE IF EXISTS Trips;
 DROP TABLE IF EXISTS Fare;
 DROP TABLE IF EXISTS Routes;
 DROP TABLE IF EXISTS Trains;
+DROP TABLE IF EXISTS AvailableSeats;
 
 -- Create tables
 
@@ -50,11 +56,12 @@ CREATE TABLE Users (
 CREATE TABLE Receipts (
 	ConfirmationNb		CHAR(6),
 	UserID				INT,
-	TotalFare			INT				NOT NULL,
+	TotalFare			DECIMAL(9,2)	NOT NULL,
 	PaymentMethod		VARCHAR(30)		NOT NULL,
 	ReceiptDate			DATE 			NOT NULL,
 	CONSTRAINT ConfirmationNb_PK PRIMARY KEY (ConfirmationNb),
-	CONSTRAINT UserID_FK FOREIGN KEY (UserID) REFERENCES Users(UserID)
+	CONSTRAINT UserID_FK FOREIGN KEY (UserID) REFERENCES Users(UserID),
+	CONSTRAINT chk_PaymentMethod CHECK (PaymentMethod IN ('Cash', 'Interac', 'Visa', 'MasterCard', 'American Express'))
 	);
 
 CREATE TABLE Passengers (
@@ -87,6 +94,7 @@ CREATE TABLE Trips (
 	TripDate			DATE  			NOT NULL,
 	DepartureTime		TIME 			NOT NULL,
 	ArrivalTime			TIME  			NOT NULL,
+	Duration			TIME  			GENERATED ALWAYS AS (TIMEDIFF(ArrivalTime,DepartureTime)),		
 	CONSTRAINT TripNb_PK PRIMARY KEY (TripNb),
 	CONSTRAINT RouteID_FK FOREIGN KEY (RouteID) REFERENCES Routes(RouteID),
 	CONSTRAINT TrainNb_FK FOREIGN KEY (TrainNb) REFERENCES Trains(TrainNb)
@@ -99,7 +107,8 @@ CREATE TABLE Tickets (
 	TripNb				CHAR(10),		
 	Class				CHAR(8)			NOT NULL,
 	Car 				DECIMAL(2),		
-	SeatNb				DECIMAL(3),		
+	SeatNb				DECIMAL(3),
+	Fare				DECIMAL(9,2),
 	CONSTRAINT TicketNb_PK PRIMARY KEY (TicketNb),
 	CONSTRAINT ConfirmationNb_FK FOREIGN KEY (ConfirmationNb) REFERENCES Receipts(ConfirmationNb),
 	CONSTRAINT PassengerID_FK FOREIGN KEY (PassengerID) REFERENCES Passengers(PassengerID),
@@ -107,14 +116,22 @@ CREATE TABLE Tickets (
 	CONSTRAINT chk_Tickets_Class CHECK (Class IN ('Economy', 'Business'))
 	);
 
-CREATE TABLE Fare (
+CREATE TABLE AvailableSeats (
 	TripNb				CHAR(10),
 	Class				CHAR(8)			NOT NULL,
-	AgeCategory			CHAR(5)			NOT NULL,
 	NbOfAvailableSeats	DECIMAL(3)		NOT NULL,
-	Fare				INT				NOT NULL,
-	CONSTRAINT TripNb_Class_AgeC_PK PRIMARY KEY (TripNb, Class, AgeCategory),
-	CONSTRAINT TripNb_Fare_FK FOREIGN KEY (TripNb) REFERENCES Trips(TripNb),
+	CONSTRAINT TripNb_Class_PK PRIMARY KEY (TripNb, Class),
+	CONSTRAINT TripNb_AS_FK FOREIGN KEY (TripNb) REFERENCES Trips(TripNb),
+	CONSTRAINT chk_AS_Class CHECK (Class IN ('Economy', 'Business'))
+	);
+
+CREATE TABLE Fare (
+	RouteID				CHAR(2),
+	Class				CHAR(8)			NOT NULL,
+	AgeCategory			CHAR(5)			NOT NULL,
+	Fare				DECIMAL(9,2)	NOT NULL,
+	CONSTRAINT RouteID_Class_AgeC_PK PRIMARY KEY (RouteID, Class, AgeCategory),
+	CONSTRAINT RouteID_Fare_FK FOREIGN KEY (RouteID) REFERENCES Routes(RouteID),
 	CONSTRAINT chk_Fare_AgeCat CHECK (AgeCategory IN ('Child', 'Adult')),
 	CONSTRAINT chk_Fare_Class CHECK (Class IN ('Economy', 'Business'))
 	);
