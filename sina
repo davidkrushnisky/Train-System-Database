@@ -1,0 +1,12 @@
+CREATE DEFINER=`admin`@`%` PROCEDURE `GetPassengerByLastName`(
+IN family varchar(30))
+BEGIN
+select T.TicketNb,P.PassengerID,P.FirstName,P.LastName,P.AgeCategory,T.Class,T.TripNb,Car,SeatNb,
+TrainNb,DepartureCity,ArrivalCity,Fare,TripDate,DepartureTime,ArrivalTime
+from Tickets T join Passengers P on T.PassengerID=P.PassengerID
+join Trips TR on T.TripNb=TR.TripNb 
+join Routes R on R.RouteID=TR.RouteID
+where LastName= family;
+END
+
+
