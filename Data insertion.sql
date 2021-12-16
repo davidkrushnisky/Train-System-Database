@@ -10,10 +10,10 @@ DELETE FROM Routes;
 DELETE FROM Trains;
 DELETE FROM AvailableSeats;
 */
+
 -- Populate Tables
-/*
-INSERT INTO Routes
-VALUES
+
+INSERT INTO Routes VALUES
 	('TM','TORONTO','MONTREAL'),
 	('TO','TORONTO','OTTAWA'),
 	('TQ','TORONTO','QUEBEC CITY'),
@@ -30,8 +30,7 @@ VALUES
 	('MQ','MONTREAL','QUEBEC CITY'),
 	('MO','MONTREAL','OTTAWA');
 
-INSERT INTO Trains (TrainNb,Capacity)
-VALUES
+INSERT INTO Trains (TrainNb,Capacity) VALUES
 	('1','90'),
 	('2','90'),
 	('3','90'),
@@ -56,8 +55,7 @@ VALUES
 	('22','90'),
 	('23','90');
 
-INSERT INTO Fare
-VALUES
+INSERT INTO Fare VALUES
 	('TM','Business', 'Adult', '200'),
 	('TM','Economy', 'Adult', '100'),
 	('TM','Business', 'Child', '100'),
@@ -119,8 +117,7 @@ VALUES
 	('MO','Business', 'Child', '50'),
 	('MO','Economy', 'Child', '25');
 
-INSERT INTO Users
-VALUES 
+INSERT INTO Users VALUES 
 	('1001','Sina','Kooshesh','SinaKooshesh@yahoo.ca','851segljns4','yes','G5H4K5','QUEBEC','CANADA','438-556-7845'),
 	('1002','Allan','Sherwood','Allaherwood@gmail.com','rgd84g8dh','yes','S1D2G1','QUEBEC','CANADA','514-784-9642'),
 	('1003','Barry','Zimmer','BarryZimmer@yahoo.com','wtjdvh574','no','L5R4D2','QUEBEC','CANADA','514-784-6982'),
@@ -140,8 +137,7 @@ VALUES
 	('1017','Mitsue','Tollner','Tollner@gmail.com','eytdhfvzjh6','yes','C6V7B7','ONTARIO','CANADA','647-879-6541'),
 	('1018','Kris','Marrier','marrier@yahoo.fr','asthcjvhjzd','yes','Q3E5F6','QUEBEC','CANADA','438-159-4873');
 
-INSERT INTO Passengers
-VALUES
+INSERT INTO Passengers VALUES
 	('10001','Sina', 'Kooshesh', 'Adult'),
 	('10002','Allan', 'Sherwood', 'Adult'),
 	('10003','Barry', 'Zimmer', 'Adult'),
@@ -175,8 +171,7 @@ VALUES
 	('10031','Maryann', 'Royster', 'Child'),
 	('10032','Alisha', 'Slusarski', 'Child');
 
-INSERT INTO Receipts (ConfirmationNb,UserID,PaymentMethod,ReceiptDate)
-VALUES
+INSERT INTO Receipts (ConfirmationNb,UserID,PaymentMethod,ReceiptDate) VALUES
 	('YXG619','1001','MasterCard','2021-02-07'),
 	('MIO987','1002','Visa','2020-11-08'),
 	('HEY890','1003','Interac','2021-02-09'),
@@ -196,10 +191,9 @@ VALUES
 	('TRE345','1017','Cash','2021-10-23'),
 	('YES987','1018','Cash','2020-05-24'),
 	('OUI987','1001','MasterCard','2021-05-24'),
-	('NON345','1002','Visa','2021-09-08');
+	('NON345','1001','Visa','2021-09-08');
 
-INSERT INTO Trips (TripNb,RouteID,TrainNb,TripDate,DepartureTime,ArrivalTime)
-VALUES 
+INSERT INTO Trips (TripNb,RouteID,TrainNb,TripDate,DepartureTime,ArrivalTime) VALUES 
     ('MT12162108','MT','1','2021-12-16','08:00:00','15:00:00'),
     ('MT12162110','MT','3','2021-12-16','10:00:00','17:00:00'),
     ('MT12162112','MT','7','2021-12-16','12:00:00','19:00:00'),
@@ -224,8 +218,7 @@ VALUES
     ('OT12272108','OT','21','2021-12-28','08:00:00','12:30:00'),
     ('OK12292111','OK','22','2021-12-29','11:00:00','13:00:00');
 
-INSERT INTO AvailableSeats
-VALUES
+INSERT INTO AvailableSeats VALUES
     ('MT12162108','Business','30'),
 	('MT12162108','Economy','60'),
 	('MT12162110','Business','30'),
@@ -273,39 +266,36 @@ VALUES
 	('OK12292111','Business','30'),
 	('OK12292111','Economy','60');
 
-="INSERT INTO Tickets VALUES ('"&A3&"','"&B3&"','"&C3&"','"&D3&"','"&E3&"','"&F3&"','"&G3&"',(SELECT Fare FROM Fare F JOIN Passengers P ON P.PassengerID = F.PassengerID WHERE F.RouteID = LEFT("&D3&",2) AND F.Class = "&E3&" AND  F.AgeCategory = P.AgeCategory));"
-*/
-/*
-INSERT INTO Tickets VALUES ('109876543','YXG619','10001','MT12162108','Economy','4','48','0');
-INSERT INTO Tickets VALUES ('126354756','MIO987','10002','MT12162108','Business','1','5','0');
-INSERT INTO Tickets VALUES ('987645678','HEY890','10003','MT12162108','Business','1','6','0');
-INSERT INTO Tickets VALUES ('719283746','LEA879','10004','MT12162108','Business','2','16','0');
-INSERT INTO Tickets VALUES ('983682019','SIS567','10005','MT12162108','Business','2','17','0');
-INSERT INTO Tickets VALUES ('293847564','MIA678','10006','MT12162108','Business','2','27','0');
-INSERT INTO Tickets VALUES ('124536475','NCA908','10007','MT12162108','Economy','4','44','0');
-INSERT INTO Tickets VALUES ('393847561','WHY789','10008','MT12162108','Economy','5','60','0');
-INSERT INTO Tickets VALUES ('124343468','QUI908','10009','MT12162108','Economy','6','80','0');
-INSERT INTO Tickets VALUES ('347521345','WHO789','10010','MT12162108','Economy','4','46','0');
-INSERT INTO Tickets VALUES ('123786432','PIP123','10011','MT12162108','Economy','5','68','0');
-INSERT INTO Tickets VALUES ('334567888','REM567','10012','MT12162108','Economy','6','78','0');
-INSERT INTO Tickets VALUES ('334674212','TRD890','10013','MT12162108','Economy','4','55','0');
-INSERT INTO Tickets VALUES ('543367865','BRO687','10014','MT12162108','Business','1','1','0');
-INSERT INTO Tickets VALUES ('334456788','MAX699','10015','MT12162108','Business','2','23','0');
-INSERT INTO Tickets VALUES ('446789977','LOT098','10016','MO12162112','Business','1','5','0');
-INSERT INTO Tickets VALUES ('654322456','TRE345','10017','MQ12162109','Business','2','22','0');
-INSERT INTO Tickets VALUES ('789098765','YES987','10018','TO12202109','Economy','4','43','0');
-INSERT INTO Tickets VALUES ('456787698','OUI987','10019','MO12162112','Economy','5','78','0');
-INSERT INTO Tickets VALUES ('132453467','NON345','10020','MQ12162109','Economy','4','64','0');
-INSERT INTO Tickets VALUES ('768236457','PIP123','10021','TO12202109','Economy','6','89','0');
-INSERT INTO Tickets VALUES ('890374578','YXG619','10022','MO12162112','Economy','5','77','0');
-INSERT INTO Tickets VALUES ('348712987','YXG619','10023','OQ12262108','Economy','6','85','0');
-INSERT INTO Tickets VALUES ('948372934','YES987','10024','TO12202109','Economy','5','70','0');
-INSERT INTO Tickets VALUES ('457892134','PIP123','10025','TL12222108','Business','1','7','0');
-INSERT INTO Tickets VALUES ('425678564','MAX699','10026','TO12202109','Business','2','21','0');
-INSERT INTO Tickets VALUES ('423615243','NON345','10027','OK12292111','Business','1','9','0');
-INSERT INTO Tickets VALUES ('362543789','YES987','10028','TM12172108','Business','2','18','0');
-INSERT INTO Tickets VALUES ('435671245','YXG619','10029','OQ12262108','Business','2','16','0');
-INSERT INTO Tickets VALUES ('57345234','NON345','10030','TL12222108','Economy','4','66','0');
-INSERT INTO Tickets VALUES ('736452135','MAX699','10031','TO12202109','Economy','5','77','0');
-INSERT INTO Tickets VALUES ('476523765','NON345','10032','MO12162112','Economy','6','88','0');
-*/
+INSERT INTO Tickets (TicketNb,ConfirmationNb,PassengerID,TripNb,Class,Car,SeatNb) VALUES
+('109876543','YXG619','10001','MT12162108','Economy','4','48'),
+('126354756','MIO987','10002','MT12162108','Business','1','5'),
+('987645678','HEY890','10003','MT12162108','Business','1','6'),
+('719283746','LEA879','10004','MT12162108','Business','2','16'),
+('983682019','SIS567','10005','MT12162108','Business','2','17'),
+('293847564','MIA678','10006','MT12162108','Business','2','27'),
+('124536475','NCA908','10007','MT12162108','Economy','4','44'),
+('393847561','WHY789','10008','MT12162108','Economy','5','60'),
+('124343468','QUI908','10009','MT12162108','Economy','6','80'),
+('347521345','WHO789','10010','MT12162108','Economy','4','46'),
+('123786432','PIP123','10011','MT12162108','Economy','5','68'),
+('334567888','REM567','10012','MT12162108','Economy','6','78'),
+('334674212','TRD890','10013','MT12162108','Economy','4','55'),
+('543367865','BRO687','10014','MT12162108','Business','1','1'),
+('334456788','MAX699','10015','MT12162108','Business','2','23'),
+('446789977','LOT098','10016','MO12162112','Business','1','5'),
+('654322456','TRE345','10017','MQ12162109','Business','2','22'),
+('789098765','YES987','10018','TO12202109','Economy','4','43'),
+('456787698','OUI987','10019','MO12162112','Economy','5','78'),
+('132453467','NON345','10020','MQ12162109','Economy','4','64'),
+('768236457','PIP123','10021','TO12202109','Economy','6','89'),
+('890374578','YXG619','10022','MO12162112','Economy','5','77'),
+('348712987','YXG619','10023','OQ12262108','Economy','6','85'),
+('948372934','YES987','10024','TO12202109','Economy','5','70'),
+('457892134','PIP123','10025','TL12222108','Business','1','7'),
+('425678564','MAX699','10026','TO12202109','Business','2','21'),
+('423615243','NON345','10027','OK12292111','Business','1','9'),
+('362543789','YES987','10028','TM12172108','Business','2','18'),
+('435671245','YXG619','10029','OQ12262108','Business','2','16'),
+('573452347','NON345','10030','TL12222108','Economy','4','66'),
+('736452135','MAX699','10031','TO12202109','Economy','5','77'),
+('476523765','NON345','10032','MO12162112','Economy','6','88');

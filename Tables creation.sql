@@ -36,6 +36,9 @@ DROP TABLE IF EXISTS Routes;
 DROP TABLE IF EXISTS Trains;
 DROP TABLE IF EXISTS AvailableSeats;
 
+DROP TRIGGER IF EXISTS Tickets_BEFORE_INSERT;
+
+
 -- Create tables
 
 CREATE TABLE Users (
@@ -56,7 +59,7 @@ CREATE TABLE Users (
 CREATE TABLE Receipts (
 	ConfirmationNb		CHAR(6),
 	UserID				INT,
-	TotalFare			DECIMAL(9,2)	NOT NULL,
+	TotalFare			DECIMAL(9,2)	NOT NULL	DEFAULT 0,
 	PaymentMethod		VARCHAR(30)		NOT NULL,
 	ReceiptDate			DATE 			NOT NULL,
 	CONSTRAINT ConfirmationNb_PK PRIMARY KEY (ConfirmationNb),
@@ -129,9 +132,35 @@ CREATE TABLE Fare (
 	RouteID				CHAR(2),
 	Class				CHAR(8)			NOT NULL,
 	AgeCategory			CHAR(5)			NOT NULL,
-	Fare				DECIMAL(9,2)	NOT NULL,
+	Price				DECIMAL(9,2)	NOT NULL,
 	CONSTRAINT RouteID_Class_AgeC_PK PRIMARY KEY (RouteID, Class, AgeCategory),
 	CONSTRAINT RouteID_Fare_FK FOREIGN KEY (RouteID) REFERENCES Routes(RouteID),
 	CONSTRAINT chk_Fare_AgeCat CHECK (AgeCategory IN ('Child', 'Adult')),
 	CONSTRAINT chk_Fare_Class CHECK (Class IN ('Economy', 'Business'))
 	);
+
+-- Add necessary triggers
+
+DELIMITER $$
+CREATE TRIGGER Tickets_BEFORE_INSERT
+BEFORE INSERT ON Tickets FOR EACH ROW
+BEGIN
+IF (SELECT NbOfAvailableSeats FROM AvailableSeats
+	WHERE TripNb = NEW.TripNb AND Class = NEW.Class) = 0
+	THEN SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = 'No More Available seats in this train for the selected class !';
+ELSE
+	UPDATE AvailableSeats
+	SET NbOfAvailableSeats = NbOfAvailableSeats - 1
+	WHERE TripNb = NEW.TripNb AND Class = NEW.Class;
+	SET NEW.Fare = (SELECT Price FROM Fare F 
+	                JOIN Trips T ON T.RouteID = F.RouteID
+					WHERE T.TripNb = NEW.TripNb AND F.Class = NEW.Class AND 
+	                F.AgeCategory = (SELECT AgeCategory FROM Passengers 
+									 WHERE PassengerID = NEW.PassengerID)
+	                );
+	UPDATE Receipts
+	SET TotalFare = TotalFare + NEW.Fare
+	WHERE ConfirmationNb = NEW.ConfirmationNb;
+END IF;                
+END$$
+DELIMITER ;
