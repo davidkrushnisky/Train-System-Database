@@ -1,0 +1,13 @@
+USE `team05`;
+DROP procedure IF EXISTS `FaresTableByDepartureCityAndArrivalCity`;
+
+DELIMITER $$
+USE `team05`$$
+CREATE PROCEDURE `FaresTableByDepartureCityAndArrivalCity` (IN DC varchar(30), IN AC varchar(30))
+BEGIN
+select DepartureCity,ArrivalCity,Class,AgeCategory,Price
+from Fare F join Routes R on F.RouteID=R.RouteID
+where R.DepartureCity=DC and R.ArrivalCity=AC;
+END$$
+
+DELIMITER ;
