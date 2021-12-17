@@ -3,6 +3,7 @@
  DROP procedure IF EXISTS FareTableByRoute;
  DROP procedure IF EXISTS GetTicketsByLastName;
  DROP procedure IF EXISTS TimeTableByArrivalCity;
+ DROP procedure IF EXISTS GetReceiptByFirstAndLastName;
 
 
 -- Procedure to list all puchases made by a user with his full name as argument
@@ -91,3 +92,19 @@ Insert INTO Users Values (id,fname,lname,email,pass,subsc,PostalC,Provin,Country
 END$$
 DELIMITER ;
 -- CALL AddNewUser('1020','Anne','Dupont','a.dupont@gmail.com','dgb4sr6bfgb','no','D4K5J3','BRITISH COLUMBIA','CANADA','345-546-9746');
+
+----Procedure to generate receipts
+DELIMITER $$
+CREATE PROCEDURE `GetReceiptByFirstAndLastName`(in FullName varchar(61))
+BEGIN
+Select r.ConfirmationNb, u.FirstName, u.LastName, ts.TripNb, tr.TrainNb, tr.TripDate, Routes.DepartureCity, tr.DepartureTime, Routes.ArrivalCity, 
+tr.ArrivalTime, tn.Carrier, ts.TicketNb, p.FirstName, p.LastName, p.AgeCategory, ts.Class, ts.Fare, r.TotalFare, r.PaymentMethod, r.ReceiptDate
+From Receipts r join Users u on r.UserID = u.UserID
+join Tickets ts on r.ConfirmationNb = ts.ConfirmationNb
+join Trips tr on ts.TripNb = tr.TripNb
+join Routes on tr.RouteID = Routes.RouteID
+join Trains tn on tr.TrainNb=tn.TrainNb
+join Passengers p on ts.PassengerID=p.PassengerID
+where concat(u.FirstName, " ", u.LastName) = FullName;
+END$$
+DELIMITER ;
