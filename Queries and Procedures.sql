@@ -4,7 +4,7 @@
  DROP procedure IF EXISTS GetTicketsByLastName;
  DROP procedure IF EXISTS TimeTableByArrivalCity;
  DROP procedure IF EXISTS GetReceiptByFirstAndLastName;
-
+DROP procedure IF EXISTS GetTripInfoByTripNb;
 
 -- Procedure to list all puchases made by a user with his full name as argument
 DELIMITER $$
@@ -93,7 +93,7 @@ END$$
 DELIMITER ;
 -- CALL AddNewUser('1020','Anne','Dupont','a.dupont@gmail.com','dgb4sr6bfgb','no','D4K5J3','BRITISH COLUMBIA','CANADA','345-546-9746');
 
-----Procedure to generate receipts
+-- Procedure to generate receipts
 DELIMITER $$
 CREATE PROCEDURE `GetReceiptByFirstAndLastName`(in FullName varchar(61))
 BEGIN
@@ -106,5 +106,16 @@ join Routes on tr.RouteID = Routes.RouteID
 join Trains tn on tr.TrainNb=tn.TrainNb
 join Passengers p on ts.PassengerID=p.PassengerID
 where concat(u.FirstName, " ", u.LastName) = FullName;
+END$$
+DELIMITER ;
+-- Example: Donette Foller
+
+--Procedure to get information on a trip by passing trip Number
+DELIMITER $$
+CREATE PROCEDURE `GetTripInfoByTripNb` (TripNumber char(10))
+BEGIN
+select TripNb, TrainNb, TripDate, DepartureCity, DepartureTime, ArrivalCity, ArrivalTime
+From Trips t join Routes r on t.RouteID=r.RouteID
+where TripNb = TripNumber;
 END$$
 DELIMITER ;
