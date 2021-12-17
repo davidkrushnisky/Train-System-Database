@@ -135,7 +135,9 @@ INSERT INTO Users VALUES
 	('1015','Donette','Foller','DonetteFoller@yahoo.ca','uygf57r!','no','A4D6B7','ONTARIO','CANADA','647-123-4569'),
 	('1016','Simona','Morasca','simona@yahoo.com','gndv35','yes','X4V5B7','ONTARIO','CANADA','646-743-9542'),
 	('1017','Mitsue','Tollner','Tollner@gmail.com','eytdhfvzjh6','yes','C6V7B7','ONTARIO','CANADA','647-879-6541'),
-	('1018','Kris','Marrier','marrier@yahoo.fr','asthcjvhjzd','yes','Q3E5F6','QUEBEC','CANADA','438-159-4873');
+	('1018','Kris','Marrier','marrier@yahoo.fr','asthcjvhjzd','yes','Q3E5F6','QUEBEC','CANADA','438-159-4873'),
+	('1020','Adrianne','Gold','pinapaulgold@gmail.com','PinappleExpress','yes','H8I9I8','BRITISH COLUMBIA','CANADA','345-567-3211');
+;
 
 INSERT INTO Passengers VALUES
 	('10001','Sina', 'Kooshesh', 'Adult'),
