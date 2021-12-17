@@ -8,24 +8,7 @@ ALTER TABLE Trips DROP FOREIGN KEY RouteID_FK;
 ALTER TABLE Trips DROP FOREIGN KEY TrainNb_FK;
 ALTER TABLE Fare DROP FOREIGN KEY RouteID_Fare_FK;
 ALTER TABLE AvailableSeats DROP FOREIGN KEY TripNb_AS_FK;
-/*
-ALTER TABLE Users DROP CHECK chk_Sub;
-ALTER TABLE Tickets DROP CHECK chk_Tickets_Class;
-ALTER TABLE Passengers DROP CHECK chk_Passengers_AgeCat;
-ALTER TABLE Fare DROP CHECK chk_Fare_AgeCat;
-ALTER TABLE Fare DROP CHECK chk_Fare_Class;
-ALTER TABLE AvailableSeats DROP CHECK chk_AS_Class;
-ALTER TABLE Receipts DROP CHECK chk_PaymentMethod;
-ALTER TABLE Routes DROP PRIMARY KEY;
-ALTER TABLE Trains DROP PRIMARY KEY;
-ALTER TABLE Users DROP PRIMARY KEY;
-ALTER TABLE Receipts DROP PRIMARY KEY;
-ALTER TABLE Tickets DROP PRIMARY KEY;
-ALTER TABLE Passengers DROP PRIMARY KEY;
-ALTER TABLE Trips DROP PRIMARY KEY;
-ALTER TABLE Fare DROP PRIMARY KEY;
-ALTER TABLE AvailableSeats DROP PRIMARY KEY;
-*/
+
 DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Receipts;
 DROP TABLE IF EXISTS Tickets;
@@ -35,7 +18,12 @@ DROP TABLE IF EXISTS Fare;
 DROP TABLE IF EXISTS Routes;
 DROP TABLE IF EXISTS Trains;
 DROP TABLE IF EXISTS AvailableSeats;
-
+DROP VIEW IF EXISTS MehdiBoardingPass;
+DROP VIEW IF EXISTS DavidBoardingPass;
+DROP VIEW IF EXISTS SinaReceipts;
+DROP VIEW IF EXISTS UsersWithNoReceipt;
+DROP VIEW IF EXISTS AdultFareForAllRoutes;
+DROP VIEW IF EXISTS MT12162108_PassengersList;
 DROP TRIGGER IF EXISTS Tickets_BEFORE_INSERT;
 
 
@@ -139,8 +127,84 @@ CREATE TABLE Fare (
 	CONSTRAINT chk_Fare_Class CHECK (Class IN ('Economy', 'Business'))
 	);
 
+-- Create Views
+
+-- View that displays Mehdi's boarding pass for Trip# MT12162108
+CREATE VIEW MehdiBoardingPass AS 
+SELECT Tkt.TicketNb, P.FirstName, P.LastName, P.AgeCategory,  Trp.TripDate,
+R.DepartureCity, Trp.DepartureTime, R.ArrivalCity, Trp.ArrivalTime,
+Trp.TrainNb, Trn.Carrier, Tkt.Class, Tkt.Car, Tkt.SeatNb, Tkt.ConfirmationNb
+FROM Tickets Tkt
+JOIN Passengers P ON P.PassengerID = Tkt.PassengerID
+JOIN Trips Trp ON Trp.TripNb = Tkt.TripNb
+JOIN Routes R ON R.RouteID = Trp.RouteID
+JOIN Trains Trn ON Trn.TrainNb = Trp.TrainNb
+WHERE P.FirstName = 'Mehdi' AND P.LastName = 'Aqdim' AND Trp.TripNb = 'MT12162108';
+-- SELECT * FROM MehdiBoardingPass;
+
+-- View that displays David's boarding pass for Trip# MT12162108
+CREATE VIEW DavidBoardingPass AS
+Select TicketNb, p.FirstName, p.LastName, p.AgeCategory, trn.Carrier, trp.TrainNb, t.Class, t.Car, t.SeatNb, 
+trp.TripDate, r.DepartureCity, trp.DepartureTime, r.ArrivalCity, trp.ArrivalTime, t.ConfirmationNb
+From Tickets t join Passengers p on t.PassengerID = p.PassengerID
+join Trips trp on t.TripNb = trp.TripNb
+join Routes r on trp.RouteID = r.RouteID
+join Trains trn on trp.TrainNb = trn.TrainNb
+where p.FirstName = 'David' and p.LastName = 'Krushnisky' AND trp.TripNb = 'MT12162108';
+-- SELECT * FROM DavidBoardingPass;
+
+-- View that lists all purchases made by Sina
+CREATE VIEW SinaReceipts AS
+SELECT R.ConfirmationNb, U.FirstName, U.LastName, R.TotalFare, R.PaymentMethod, R.ReceiptDate
+FROM Receipts R
+JOIN Users U on U.UserID = R.UserID
+WHERE U.FirstName = 'Sina' AND U.LastName = 'Kooshesh';
+-- SELECT * FROM SinaReceipts;
+
+-- View that displays users who never made a purchase
+CREATE VIEW UsersWithNoReceipt AS
+Select u.UserID, FirstName, LastName, Email, PostalCode, Province, Country, PhoneNumber
+From Users u left join Receipts r on u.UserID = r.UserID
+where r.ConfirmationNb is null;
+-- SELECT * FROM UsersWithNoReceipt;
+
+-- View that lists adults' fare for all routes
+CREATE VIEW AdultFareForAllRoutes AS
+SELECT R.DepartureCity, R.ArrivalCity, F.Class, F.Price
+FROM Routes R
+JOIN Fare F ON F.RouteID = R.RouteID
+WHERE F.AgeCategory = 'Adult';
+-- SELECT * FROM AdultFareForAllRoutes;
+
+-- View that lists all passengers on Trip# MT12162108
+CREATE VIEW MT12162108_PassengersList AS
+SELECT CONCAT(P.LastName,', ',P.FirstName) AS FullName, P.AgeCategory, T.Class, T.Car, T.SeatNb
+FROM Tickets T 
+JOIN Passengers P ON T.PassengerID=P.PassengerID
+WHERE T.TripNb = 'MT12162108'
+ORDER BY SeatNb;
+-- SELECT * FROM MT12162108_PassengersList;
+
+-- View that lists the number of available seats per train leaving from Montreal
+CREATE VIEW NbOfAvailableSeatsFromMontreal AS
+SELECT T.TripNb, R.DepartureCity, R.ArrivalCity, T.TripDate,
+T.DepartureTime, A.Class, A.NbOfAvailableSeats
+FROM AvailableSeats A
+JOIN Trips T ON T.TripNb = A.TripNb
+JOIN Routes R ON R.RouteID = T.RouteID
+WHERE R.DepartureCity = 'Montreal'
+ORDER BY T.TripDate, T.DepartureTime;
+-- SELECT * FROM NbOfAvailableSeatsFromMontreal;
+
 -- Add necessary triggers
 
+/*This trigger get executed before every insert to:
+  1. Verify if there are available seats in the chosen trip and class
+  2. If not, abort the insert and display an error message
+  3. If seats are available, Decrement the number of available seats
+  4. Fetch the fare for the selected trip and class and insert it in the ticket price column
+  5. Add the fare to the TotalFare column in the Receipts table
+*/
 DELIMITER $$
 CREATE TRIGGER Tickets_BEFORE_INSERT
 BEFORE INSERT ON Tickets FOR EACH ROW
