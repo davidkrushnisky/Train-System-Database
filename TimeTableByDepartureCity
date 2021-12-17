@@ -1,0 +1,13 @@
+USE `team05`;
+DROP procedure IF EXISTS `TimeTableByDepartureCity`;
+
+DELIMITER $$
+USE `team05`$$
+CREATE PROCEDURE `TimeTableByDepartureCity` (IN city varchar(30))
+BEGIN
+select DepartureCity,ArrivalCity,TripDate,TrainNb,DepartureTime,ArrivalTime,Duration
+from Trips TR join Routes R on R.RouteID=TR.RouteID
+where DepartureCity=city;
+END$$
+
+DELIMITER ;
